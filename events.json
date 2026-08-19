@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "Festa di Primavera",
+    "location": "Calizzano, SV",
+    "lat": 44.234,
+    "lng": 8.103,
+    "startDate": "2026-05-10",
+    "endDate": "2026-05-11",
+    "tags": ["primavera", "fiori", "proloco"],
+    "image": "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600",
+    "link": "#"
+  },
+  {
+    "id": 2,
+    "title": "Funghinpiazza",
+    "location": "Calizzano, Savona",
+    "lat": 44.236,
+    "lng": 8.101,
+    "startDate": "2026-10-10",
+    "endDate": "2026-10-11",
+    "tags": ["funghi", "proloco", "autunno"],
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600",
+    "link": "#"
+  }
+]
