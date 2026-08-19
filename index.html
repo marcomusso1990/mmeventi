@@ -63,6 +63,660 @@
       font-weight: bold;
       cursor: pointer;
       font-size: 0.85rem;
+      display: none; /* Visibile solo ad Admin */
+    }
+    
+    .search-box {
+      background: var(--card-bg);
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .search-box input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+
+    /* Raggio Km Filter */
+    .radius-filter-container {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: #eef6ff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #cce5ff;
+      flex-wrap: wrap;
+    }
+    .radius-filter-container label {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #004085;
+    }
+    .radius-filter-container input[type="text"] {
+      flex: 1.5;
+      min-width: 180px;
+      padding: 8px;
+      margin-bottom: 0;
+      font-size: 0.9rem;
+    }
+    .radius-filter-container input[type="number"] {
+      width: 80px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .btn-radius-search {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .btn-radius-reset {
+      background: #e9ecef;
+      border: 1px solid #ccc;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .date-filter-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: #f8f9fa;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+    .date-inputs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .date-inputs label {
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: #666;
+    }
+    .date-inputs input[type="date"] {
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .quick-date-btns {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+    .btn-quick {
+      background: #ffffff;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-quick:hover {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-reset-dates {
+      background: #e9ecef;
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    
+    .tags-container {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    .btn-reset-tags {
+      background: #fee2e2;
+      color: #dc3545;
+      border: 1px solid #fca5a5;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      display: none; /* Visibile solo se ci sono tag attivi */
+    }
+    .btn-reset-tags:hover {
+      background: #f8d7da;
+    }
+    .tag {
+      background: #e9ecef;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      user-select: none;
+    }
+    .tag.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .events-wrapper {
+      flex: 1;
+    }
+    .map-wrapper {
+      width: 100%;
+      height: 380px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #ddd;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    .event-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+    .event-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: #eee;
+    }
+    .event-details {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex: 1;
+    }
+    .event-title { font-size: 1.15rem; font-weight: bold; margin: 0 0 6px 0; }
+    .event-info { font-size: 0.85rem; color: #666; margin-bottom: 10px; }
+    .event-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+    .event-tag-small { font-size: 0.75rem; color: var(--primary); font-weight: 600; background: #e7f3ff; padding: 2px 6px; border-radius: 4px; }
+    .distance-badge {
+      display: inline-block;
+      background: #28a745;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 6px;
+    }
+
+    .event-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+      margin-top: 5px;
+      gap: 8px;
+    }
+    .event-links-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .event-link {
+      font-size: 0.85rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .btn-share {
+      background: #17a2b8;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-edit {
+      background: #f8f9fa;
+      border: 1px solid #ccc;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: #333;
+    }
+
+    @media (min-width: 850px) {
+      .main-content {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+      .events-wrapper {
+        flex: 1.2;
+      }
+      .map-wrapper {
+        flex: 0.8;
+        height: 550px;
+        position: sticky;
+        top: 15px;
+      }
+    }
+
+    /* Modal Generica */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      z-index: 2000;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 460px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-content h3 { margin-top: 0; color: var(--primary); }
+    .modal-content label { font-size: 0.8rem; font-weight: bold; color: #555; display: block; margin-top: 10px; }
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 4px;
+      box-sizing: border-box;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.95rem;
+    }
+    .modal-content input:disabled {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+    }
+    .date-row, .coords-row {
+      display: flex;
+      gap: 10px;
+    }
+    .date-row > div, .coords-row > div {
+      flex: 1;
+    }
+    .auto-fetch-box {
+      background: #f0f7ff;
+      border: 1px dashed var(--primary);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .btn-action {
+      width: 100%;
+      padding: 11px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .btn-lookup {
+      background: #17a2b8;
+      color: white;
+      margin-top: 6px;
+      padding: 7px;
+      font-size: 0.8rem;
+    }
+    .btn-img-search {
+      background: #6f42c1;
+      color: white;
+      margin-top: 6px;
+      padding: 8px;
+      font-size: 0.85rem;
+    }
+    .btn-extract { background: #1877f2; color: white; }
+    .btn-save { background: var(--accent); color: white; }
+    .btn-delete { background: var(--danger); color: white; margin-top: 8px; }
+    .btn-cancel { background: #6c757d; color: white; margin-top: 8px; }
+    .error-msg { color: var(--danger); font-size: 0.85rem; font-weight: bold; margin-top: 8px; display: none; }
+
+    /* Griglia immagini cercate */
+    .image-results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 8px;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+    .image-results-grid img {
+      width: 100%;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s;
+    }
+    .image-results-grid img:hover {
+      transform: scale(1.05);
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header>
+      <h1>AroundVB</h1>
+      <div class="header-btns">
+        <button class="add-event-btn" id="addEventBtn" onclick="openAddModal()">➕ Aggiungi Evento</button>
+        <button class="auth-btn" id="authBtn" onclick="handleAuthClick()">🔑 Admin Login</button>
+      </div>
+    </header>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Cerca parola chiave (es. funghi, proloco)..." oninput="filterEvents()">
+      
+      <!-- Filtro Raggio Km -->
+      <div class="radius-filter-container">
+        <label>📍 Da:</label>
+        <input type="text" id="centerLocationInput" placeholder="es. Carcare, Savona o CAP (es. 17043)">
+        <label>Entro:</label>
+        <input type="number" id="radiusKmInput" placeholder="30" min="1" max="500" value="30">
+        <label>km</label>
+        <button class="btn-radius-search" onclick="applyRadiusFilter()">🔍 Filtra Raggio</button>
+        <button class="btn-radius-reset" onclick="resetRadiusFilter()">Azzera</button>
+      </div>
+
+      <!-- Filtro Date -->
+      <div class="date-filter-container">
+        <div class="date-inputs">
+          <label>Da:</label>
+          <input type="date" id="filterStartDate" onchange="filterEvents()">
+          <label>A:</label>
+          <input type="date" id="filterEndDate" onchange="filterEvents()">
+        </div>
+        
+        <div class="quick-date-btns">
+          <button class="btn-quick" onclick="setQuickDate('today')">Oggi</button>
+          <button class="btn-quick" onclick="setQuickDate('weekend')">Questo Weekend</button>
+          <button class="btn-reset-dates" onclick="resetDateFilter()">Azzera</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenitore Tag + Tasto Azzera Tag -->
+    <div class="tags-container">
+      <button class="btn-reset-tags" id="btnResetTags" onclick="resetTagFilter()">✕ Azzera tag</button>
+      <div id="tagsList" style="display: flex; gap: 8px;"></div>
+    </div>
+
+    <div class="main-content">
+      <div class="events-wrapper">
+        <div id="eventsList"></div>
+      </div>
+
+      <div class="map-wrapper">
+        <div id="map"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Login Admin -->
+  <div class="modal" id="loginModal">
+    <div class="modal-content" style="max-width: 320px;">
+      <h3>🔐 Area Riservata Admin</h3>
+      <label for="adminUser">Username</label>
+      <input type="text" id="adminUser" placeholder="admin">
+
+      <label for="adminPass">Password</label>
+      <input type="password" id="adminPass" placeholder="••••••••">
+
+      <div class="error-msg" id="loginError">Credenziali errate! Riprova.</div>
+
+      <button class="btn-action btn-save" onclick="submitLogin()">Accedi</button>
+      <button class="btn-action btn-cancel" onclick="closeLoginModal()">Annulla</button>
+    </div>
+  </div>
+
+  <!-- Modal Admin Gestione Evento -->
+  <div class="modal" id="adminModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">➕ Inserisci Evento</h3>
+      
+      <div class="auto-fetch-box" id="autoFetchContainer">
+        <label for="evLink">🔗 Link dell'Evento (FB, Web, ecc.)</label>
+        <input type="text" id="evLink" placeholder="Incolla qui l'URL dell'evento...">
+        <button class="btn-action btn-extract" onclick="autoExtractData()">⚡ Estrrai Dati e Coordinate dal Link</button>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+      <input type="hidden" id="editingEventId" value="">
+
+      <label for="evTitle">Nome Evento*</label>
+      <input type="text" id="evTitle" placeholder="es. Festa di Primavera">
+
+      <label for="evLocation">Luogo / Paesino / Indirizzo / CAP*</label>
+      <input type="text" id="evLocation" placeholder="es. San Bernardo Calizzano SV o 17020">
+      <button class="btn-action btn-lookup" onclick="lookupAddressCoordinates()">🔍 Trova Coordinate dal Luogo</button>
+
+      <div class="coords-row">
+        <div>
+          <label for="evLat">Latitudine</label>
+          <input type="number" step="any" id="evLat" placeholder="Calcolata da server">
+        </div>
+        <div>
+          <label for="evLng">Longitudine</label>
+          <input type="number" step="any" id="evLng" placeholder="Calcolata da server">
+        </div>
+      </div>
+
+      <div class="date-row">
+        <div>
+          <label for="evStartDate">Data Inizio*</label>
+          <input type="date" id="evStartDate" onchange="handleStartDateChange()">
+        </div>
+        <div>
+          <label for="evEndDate">Data Fine</label>
+          <input type="date" id="evEndDate" disabled>
+        </div>
+      </div>
+
+      <label for="evTags">Tag (separati da virgola)</label>
+      <input type="text" id="evTags" placeholder="es. primavera, fiori, proloco">
+
+      <label for="evImg">URL Immagine</label>
+      <input type="text" id="evImg" placeholder="https://... o usa la ricerca qui sotto">
+      <button class="btn-action btn-img-search" onclick="searchImagesOnline()">📷 Cerca Immagine Correlata online</button>
+      
+      <!-- Contenitore per i risultati delle immagini cercate -->
+      <div id="imageSearchResults" class="image-results-grid" style="display:none;"></div>
+
+      <button class="btn-action btn-save" onclick="saveEvent()">💾 Salva Evento</button>
+      <button class="btn-action btn-delete" id="btnDelete" style="display:none;" onclick="deleteCurrentEvent()">🗑️ Elimina Evento</button>
+      <button class="btn-action btn-cancel" onclick="toggleModal(false)">Annulla</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Dati evento di prova iniziale
+    let events = JSON.parse(localStorage.getItem('mmeventi_data')) || [
+      {
+        id: 1,
+        title: "Festa di Primavera",
+        location: "Calizzano, SV",
+        lat: 44.234,
+        lng: 8.103,
+        startDate: "2026-05-10",
+        endDate: "2026-05-11",
+        tags: ["primavera", "fiori", "proloco"],
+        image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600",
+        link: "#"
+      },
+      {
+        id: 2,
+        title: "Funghinpiazza",
+        location: "Calizzano, Savona",
+        lat: 44.236,
+        lng: 8.101,
+        startDate: "2026-10-10",
+        endDate: "2026-10-11",
+        tags: ["funghi", "proloco", "autunno"],
+        image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600",
+        link: "#"
+      }
+    ];
+
+    // Stato di autenticazione dell'utente
+    let isAdmin = sessionStorage.getItem('mmeventi_isAdmin') === 'true';
+
+    // Set per memorizzare i tag attivi selezionati
+    let selectedTags = new Set();
+    let map, markersGroup;
+    let searchCenterCoords = null;
+
+    window.onload = () => {
+      initMap();
+      renderTags();
+      updateAuthUI();
+      filterEvents();
+    };
+
+    /* ===================================================
+        RICERCA E SELEZIONE IMMAGINI AUTOMATICA ED ONLINE
+    =================================================== */
+    async function searchImagesOnline() {
+      const title = document.getElementById('evTitle').value.trim();
+      const tags = document.getElementById('evTags').value.trim();
+      const query = (title + " " + tags).trim() || "festival italia";
+
+      const grid = document.getElementById('imageSearchResults');
+      grid.innerHTML = "<small style='grid-column: span 3;'>Ricerca in corso...</small>";
+      grid.style.display = "grid";
+
+      try {
+        const response = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gteissearch=1&gsrsearch=${encodeURIComponent(query)}&gsrlimit=6&prop=pageimages&piprop=thumbnail&pithumbsize=600&format=json&origin=*`);
+        const data = await response.json();
+
+        grid.innerHTML = "";
+        
+        if (data.query && data.query.pages) {
+          const pages = Object.values(data.query.pages);
+          let found = false;
+
+          pages.forEach(page => {
+            if (page.thumbnail && page.thumbnail.source) {
+              found = true;
+              const img = document.createElement('img');
+              img.src = page.thumbnail.source;
+              img.title = "Clicca per selezionare";
+              img.onclick = () => selectImage(page.thumbnail.source);
+              grid.appendChild(img);
+            }
+          });
+
+          if (!found) {
+            grid.innerHTML = "<small style='grid-column: span 3;'>Nessuna immagine trovata per la parola chiave. Verrà usata l'immagine automatica predefinita.</small>";
+          }
+        } else {
+          grid.innerHTML = "<small style='grid-column: span 3;'>Nessuna immagine trovata.</small>";
+        }
+      } catch (err) {
+        grid.innerHTML = "<small style='grid-column: span 3;'>Errore durante la ricerca online.</small>";
+      }
+    }
+
+    function selectImage(url) {
+      document.getElementById('evImg').value = url;
+      document.getElementById('imageSearchResults').style.display = 'none';
+      alert("✅ Immagine selezionata con successo!");
+    }
+
+    function getAutoImageUrl(title, location, tagsArray) {
+      const textToAnalyze = `${title} ${location} ${tagsArray.join(' ')}`.toLowerCase();
+
+      let queryKeyword = "festiva      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    h1 { margin: 0; font-size: 1.5rem; color: var(--primary); }
+    
+    .header-btns {
+      display: flex;
+      gap: 8px;
+    }
+    .auth-btn {
+      background: var(--dark);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .add-event-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.85rem;
       display: none;
     }
     
