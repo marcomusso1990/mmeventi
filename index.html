@@ -584,28 +584,25 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // Variabile che conterrà la lista degli eventi dal file JSON
     let events = [];
 
-// Caricamento rigido dal file events.json (senza leggere dal PC)
-async function loadEventsFromJSON() {
-  try {
-    // Aggiungiamo un parametro casuale per evitare che il browser usi la cache
-    const response = await fetch('./events.json?v=' + Date.now());
-    if (!response.ok) {
-      throw new Error("Impossibile trovare o leggere il file events.json");
-    }
-    events = await response.json();
-    console.log("Dati caricati con successo da events.json:", events);
-  } catch (err) {
-    console.error("ERRORE:", err);
-    alert("⚠️ Impossibile leggere il file 'events.json'. Se stai aprendo il file con un doppio clic locale (file:///), il browser blocca la lettura per sicurezza.");
-    events = []; // Imposta la lista vuota invece di usare la memoria del PC
-  }
+    // Caricamento asincrono dal file events.json
+    async function loadEventsFromJSON() {
+      try {
+        // Il parametro Date.now() evita che il browser mostri dati vecchi salvati in cache
+        const response = await fetch('./events.json?v=' + Date.now());
+        if (!response.ok) {
+          throw new Error("Impossibile caricare events.json");
+        }
+        events = await response.json();
+      } catch (err) {
+        console.error("Errore nel caricamento del file JSON:", err);
+        events = [];
+      }
 
-  renderTags();
-  filterEvents();
-}
+      renderTags();
+      filterEvents();
+    }
 
     let isAdmin = sessionStorage.getItem('mmeventi_isAdmin') === 'true';
     let selectedTags = new Set();
