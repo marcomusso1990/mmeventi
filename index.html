@@ -63,7 +63,7 @@
       font-weight: bold;
       cursor: pointer;
       font-size: 0.85rem;
-      display: none; /* Visibile solo ad Admin */
+      display: none;
     }
     
     .search-box {
@@ -85,7 +85,6 @@
       font-size: 1rem;
     }
 
-    /* Raggio Km Filter */
     .radius-filter-container {
       display: flex;
       gap: 8px;
@@ -207,7 +206,7 @@
       white-space: nowrap;
       cursor: pointer;
       user-select: none;
-      display: none; /* Visibile solo se ci sono tag attivi */
+      display: none;
     }
     .btn-reset-tags:hover {
       background: #f8d7da;
@@ -346,7 +345,6 @@
       }
     }
 
-    /* Modal Generica */
     .modal {
       display: none;
       position: fixed;
@@ -425,7 +423,6 @@
     .btn-cancel { background: #6c757d; color: white; margin-top: 8px; }
     .error-msg { color: var(--danger); font-size: 0.85rem; font-weight: bold; margin-top: 8px; display: none; }
 
-    /* Griglia immagini cercate */
     .image-results-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -457,7 +454,7 @@
 
   <div class="app-container">
     <header>
-      <h1>AroundVB</h1>
+      <h1>MMeventi</h1>
       <div class="header-btns">
         <button class="add-event-btn" id="addEventBtn" onclick="openAddModal()">➕ Aggiungi Evento</button>
         <button class="auth-btn" id="authBtn" onclick="handleAuthClick()">🔑 Admin Login</button>
@@ -467,7 +464,6 @@
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="Cerca parola chiave (es. funghi, proloco)..." oninput="filterEvents()">
       
-      <!-- Filtro Raggio Km -->
       <div class="radius-filter-container">
         <label>📍 Da:</label>
         <input type="text" id="centerLocationInput" placeholder="es. Carcare, Savona o CAP (es. 17043)">
@@ -478,7 +474,6 @@
         <button class="btn-radius-reset" onclick="resetRadiusFilter()">Azzera</button>
       </div>
 
-      <!-- Filtro Date -->
       <div class="date-filter-container">
         <div class="date-inputs">
           <label>Da:</label>
@@ -495,7 +490,6 @@
       </div>
     </div>
 
-    <!-- Contenitore Tag + Tasto Azzera Tag -->
     <div class="tags-container">
       <button class="btn-reset-tags" id="btnResetTags" onclick="resetTagFilter()">✕ Azzera tag</button>
       <div id="tagsList" style="display: flex; gap: 8px;"></div>
@@ -516,8 +510,8 @@
   <div class="modal" id="loginModal">
     <div class="modal-content" style="max-width: 320px;">
       <h3>🔐 Area Riservata Admin</h3>
-      <label for="adminUser">Username</label>
-      <input type="text" id="adminUser" placeholder="admin">
+      <label for="adminEmail">Email Admin</label>
+      <input type="email" id="adminEmail" placeholder="admin@email.com">
 
       <label for="adminPass">Password</label>
       <input type="password" id="adminPass" placeholder="••••••••">
@@ -580,7 +574,6 @@
       <input type="text" id="evImg" placeholder="https://... o usa la ricerca qui sotto">
       <button class="btn-action btn-img-search" onclick="searchImagesOnline()">📷 Cerca Immagine Correlata online</button>
       
-      <!-- Contenitore per i risultati delle immagini cercate -->
       <div id="imageSearchResults" class="image-results-grid" style="display:none;"></div>
 
       <button class="btn-action btn-save" onclick="saveEvent()">💾 Salva Evento</button>
@@ -589,134 +582,182 @@
     </div>
   </div>
 
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script>
-    // Dati evento di prova iniziale
-    let events = JSON.parse(localStorage.getItem('mmeventi_data')) || [
-      {
-        id: 1,
-        title: "Festa di Primavera",
-        location: "Calizzano, SV",
-        lat: 44.234,
-        lng: 8.103,
-        startDate: "2026-05-10",
-        endDate: "2026-05-11",
-        tags: ["primavera", "fiori", "proloco"],
-        image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600",
-        link: "#"
-      },
-      {
-        id: 2,
-        title: "Funghinpiazza",
-        location: "Calizzano, Savona",
-        lat: 44.236,
-        lng: 8.101,
-        startDate: "2026-10-10",
-        endDate: "2026-10-11",
-        tags: ["funghi", "proloco", "autunno"],
-        image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600",
-        link: "#"
-      }
-    ];
+  <!-- Firebase SDKs (v10 Modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Stato di autenticazione dell'utente
-    let isAdmin = sessionStorage.getItem('mmeventi_isAdmin') === 'true';
+    // Configurazione del tuo progetto mmeventi2026
+    const firebaseConfig = {
+      apiKey: "AIzaSyDg8RhDgs2PSbai6cICHIrVyj73ePFxUrU",
+      authDomain: "mmeventi2026.firebaseapp.com",
+      projectId: "mmeventi2026",
+      storageBucket: "mmeventi2026.firebasestorage.app",
+      messagingSenderId: "490727907357",
+      appId: "1:490727907357:web:84fe288bad8a5a47e626f4"
+    };
 
-    // Set per memorizzare i tag attivi selezionati
-    let selectedTags = new Set();
+    // Inizializzazione Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Variabili Globali dello Stato
+    window.events = [];
+    window.isAdmin = false;
+    window.selectedTags = new Set();
+    window.searchCenterCoords = null;
     let map, markersGroup;
-    let searchCenterCoords = null;
 
-    window.onload = () => {
-      initMap();
-      renderTags();
+    // Ascolto stato Autenticazione (Admin Login/Logout)
+    onAuthStateChanged(auth, (user) => {
+      window.isAdmin = !!user;
       updateAuthUI();
       filterEvents();
+    });
+
+    // Ascolto in tempo reale dei dati da Firestore Database
+    onSnapshot(collection(db, "events"), (snapshot) => {
+      window.events = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      renderTags();
+      filterEvents();
+    }, (error) => {
+      console.error("Errore nel caricamento eventi da Firestore:", error);
+    });
+
+    // Inizializzazione Mappa all'avvio
+    window.addEventListener('DOMContentLoaded', () => {
+      initMap();
+    });
+
+    /* ===================================================
+        FUNZIONALITÀ FIREBASE E AUTHENTICATION
+    =================================================== */
+    window.handleAuthClick = function() {
+      if (window.isAdmin) {
+        signOut(auth).then(() => {
+          alert("Logout effettuato con successo.");
+        });
+      } else {
+        document.getElementById('adminEmail').value = '';
+        document.getElementById('adminPass').value = '';
+        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('loginModal').style.display = 'flex';
+      }
+    };
+
+    window.submitLogin = function() {
+      const email = document.getElementById('adminEmail').value.trim();
+      const pass = document.getElementById('adminPass').value.trim();
+
+      signInWithEmailAndPassword(auth, email, pass)
+        .then(() => {
+          closeLoginModal();
+        })
+        .catch((err) => {
+          console.error("Errore login:", err);
+          document.getElementById('loginError').innerText = "Credenziali errate o errore di connessione!";
+          document.getElementById('loginError').style.display = 'block';
+        });
+    };
+
+    window.closeLoginModal = function() {
+      document.getElementById('loginModal').style.display = 'none';
+    };
+
+    window.saveEvent = async function() {
+      if (!window.isAdmin) return;
+
+      const editingId = document.getElementById('editingEventId').value;
+      const title = document.getElementById('evTitle').value.trim();
+      const location = document.getElementById('evLocation').value.trim();
+      let lat = parseFloat(document.getElementById('evLat').value);
+      let lng = parseFloat(document.getElementById('evLng').value);
+      const startDate = document.getElementById('evStartDate').value;
+      let endDate = document.getElementById('evEndDate').value;
+      const tagsRaw = document.getElementById('evTags').value;
+      let image = document.getElementById('evImg').value.trim();
+      const link = document.getElementById('evLink').value.trim();
+
+      if (!title || !location || !startDate) {
+        alert("Compila i campi obbligatori: Nome, Luogo e Data Inizio!");
+        return;
+      }
+
+      if (isNaN(lat) || isNaN(lng)) {
+        const coords = await fetchCoordinatesFromServer(location);
+        if (coords) {
+          lat = coords.lat;
+          lng = coords.lng;
+        } else {
+          lat = 44.235;
+          lng = 8.102;
+        }
+      }
+
+      if (!endDate) endDate = startDate;
+      const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : ["evento"];
+
+      if (!image) {
+        image = getAutoImageUrl(title, location, tags);
+      }
+
+      const eventData = {
+        title,
+        location,
+        lat,
+        lng,
+        startDate,
+        endDate,
+        tags,
+        image,
+        link: link || '#'
+      };
+
+      try {
+        if (editingId) {
+          await updateDoc(doc(db, "events", editingId), eventData);
+        } else {
+          await addDoc(collection(db, "events"), eventData);
+        }
+        toggleModal(false);
+      } catch (err) {
+        console.error("Errore durante il salvataggio:", err);
+        alert("Errore nel salvataggio dell'evento su Firestore. Verifica le regole di sicurezza.");
+      }
+    };
+
+    window.deleteCurrentEvent = async function() {
+      if (!window.isAdmin) return;
+      const editingId = document.getElementById('editingEventId').value;
+      if (!editingId) return;
+
+      if (confirm("Sei sicuro di voler eliminare questo evento da Firestore?")) {
+        try {
+          await deleteDoc(doc(db, "events", editingId));
+          toggleModal(false);
+        } catch (err) {
+          console.error("Errore eliminazione:", err);
+          alert("Impossibile eliminare l'evento.");
+        }
+      }
     };
 
     /* ===================================================
-        RICERCA E SELEZIONE IMMAGINI AUTOMATICA ED ONLINE
-    =================================================== */
-    async function searchImagesOnline() {
-      const title = document.getElementById('evTitle').value.trim();
-      const tags = document.getElementById('evTags').value.trim();
-      const query = (title + " " + tags).trim() || "festival italia";
-
-      const grid = document.getElementById('imageSearchResults');
-      grid.innerHTML = "<small style='grid-column: span 3;'>Ricerca in corso...</small>";
-      grid.style.display = "grid";
-
-      try {
-        const response = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gteissearch=1&gsrsearch=${encodeURIComponent(query)}&gsrlimit=6&prop=pageimages&piprop=thumbnail&pithumbsize=600&format=json&origin=*`);
-        const data = await response.json();
-
-        grid.innerHTML = "";
-        
-        if (data.query && data.query.pages) {
-          const pages = Object.values(data.query.pages);
-          let found = false;
-
-          pages.forEach(page => {
-            if (page.thumbnail && page.thumbnail.source) {
-              found = true;
-              const img = document.createElement('img');
-              img.src = page.thumbnail.source;
-              img.title = "Clicca per selezionare";
-              img.onclick = () => selectImage(page.thumbnail.source);
-              grid.appendChild(img);
-            }
-          });
-
-          if (!found) {
-            grid.innerHTML = "<small style='grid-column: span 3;'>Nessuna immagine trovata per la parola chiave. Verrà usata l'immagine automatica predefinita.</small>";
-          }
-        } else {
-          grid.innerHTML = "<small style='grid-column: span 3;'>Nessuna immagine trovata.</small>";
-        }
-      } catch (err) {
-        grid.innerHTML = "<small style='grid-column: span 3;'>Errore durante la ricerca online.</small>";
-      }
-    }
-
-    function selectImage(url) {
-      document.getElementById('evImg').value = url;
-      document.getElementById('imageSearchResults').style.display = 'none';
-      alert("✅ Immagine selezionata con successo!");
-    }
-
-    function getAutoImageUrl(title, location, tagsArray) {
-      const textToAnalyze = `${title} ${location} ${tagsArray.join(' ')}`.toLowerCase();
-
-      let queryKeyword = "festival";
-
-      if (textToAnalyze.includes("primavera") || textToAnalyze.includes("fiori") || textToAnalyze.includes("fioritura")) {
-        queryKeyword = "flowers,spring";
-      } else if (textToAnalyze.includes("fung") || textToAnalyze.includes("porcin")) {
-        queryKeyword = "mushrooms";
-      } else if (textToAnalyze.includes("castagn") || textToAnalyze.includes("caldarroste")) {
-        queryKeyword = "chestnuts";
-      } else if (textToAnalyze.includes("vino") || textToAnalyze.includes("vendemmia") || textToAnalyze.includes("cantin")) {
-        queryKeyword = "wine";
-      } else if (textToAnalyze.includes("birra") || textToAnalyze.includes("beer")) {
-        queryKeyword = "beer";
-      } else if (textToAnalyze.includes("musica") || textToAnalyze.includes("concerto") || textToAnalyze.includes("dj")) {
-        queryKeyword = "concert";
-      } else if (textToAnalyze.includes("sagra") || textToAnalyze.includes("cibo") || textToAnalyze.includes("gastronom")) {
-        queryKeyword = "food";
-      }
-
-      return `https://picsum.photos/seed/${encodeURIComponent(queryKeyword)}/600/400`;
-    }
-
-    /* ===================================================
-        GESTIONE AUTENTICAZIONE ED INTERFACCIA UTENTE
+        INTERFACCIA UTENTE E MAPPA (Leaflet / Filtri)
     =================================================== */
     function updateAuthUI() {
       const authBtn = document.getElementById('authBtn');
       const addEventBtn = document.getElementById('addEventBtn');
 
-      if (isAdmin) {
+      if (window.isAdmin) {
         authBtn.innerText = "🚪 Admin Logout";
         authBtn.style.background = "#dc3545";
         addEventBtn.style.display = "block";
@@ -727,61 +768,22 @@
       }
     }
 
-    function handleAuthClick() {
-      if (isAdmin) {
-        isAdmin = false;
-        sessionStorage.setItem('mmeventi_isAdmin', 'false');
-        updateAuthUI();
-        filterEvents();
-      } else {
-        document.getElementById('adminUser').value = '';
-        document.getElementById('adminPass').value = '';
-        document.getElementById('loginError').style.display = 'none';
-        document.getElementById('loginModal').style.display = 'flex';
-      }
-    }
-
-    function closeLoginModal() {
-      document.getElementById('loginModal').style.display = 'none';
-    }
-
-    function submitLogin() {
-      const user = document.getElementById('adminUser').value.trim();
-      const pass = document.getElementById('adminPass').value.trim();
-
-      if (user === 'admin' && pass === 'admin') {
-        isAdmin = true;
-        sessionStorage.setItem('mmeventi_isAdmin', 'true');
-        closeLoginModal();
-        updateAuthUI();
-        filterEvents();
-      } else {
-        document.getElementById('loginError').style.display = 'block';
-      }
-    }
-
-    /* ===================================================
-        FUNZIONALITA' MAPPA E RENDERING
-    =================================================== */
     function initMap() {
       map = L.map('map').setView([44.3, 8.25], 10);
-
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '© OpenStreetMap'
       }).addTo(map);
-
       markersGroup = L.layerGroup().addTo(map);
     }
 
-    function handleStartDateChange() {
+    window.handleStartDateChange = function() {
       const startDateInput = document.getElementById('evStartDate');
       const endDateInput = document.getElementById('evEndDate');
 
       if (startDateInput.value) {
         endDateInput.disabled = false;
         endDateInput.min = startDateInput.value;
-
         if (!endDateInput.value || endDateInput.value < startDateInput.value) {
           endDateInput.value = startDateInput.value;
         }
@@ -789,10 +791,10 @@
         endDateInput.disabled = true;
         endDateInput.value = '';
       }
-    }
+    };
 
-    function shareEvent(eventId) {
-      const ev = events.find(e => e.id === eventId);
+    window.shareEvent = function(eventId) {
+      const ev = window.events.find(e => e.id === eventId);
       if (!ev) return;
 
       const dateText = formatDateDisplay(ev.startDate, ev.endDate);
@@ -809,12 +811,10 @@
       } else {
         const fullShareContent = `${shareTitle}\n${shareText}\n${shareUrl}`;
         navigator.clipboard.writeText(fullShareContent).then(() => {
-          alert("📋 Dettagli dell'evento copiati negli appunti!\nPuoi incollarli su Facebook, Instagram o WhatsApp.");
-        }).catch(() => {
-          alert("Errore nella copiatura automatica. Copia manualmente il link!");
-        });
+          alert("📋 Dettagli dell'evento copiati negli appunti!");
+        }).catch(() => alert("Errore durante la copiatura."));
       }
-    }
+    };
 
     function calculateDistanceKm(lat1, lon1, lat2, lon2) {
       const R = 6371;
@@ -828,41 +828,37 @@
       return R * c;
     }
 
-    async function applyRadiusFilter() {
+    window.applyRadiusFilter = async function() {
       const centerText = document.getElementById('centerLocationInput').value.trim();
       const radiusValue = parseFloat(document.getElementById('radiusKmInput').value);
 
-      if (!centerText) {
-        alert("Inserisci un luogo o un CAP di partenza!");
-        return;
-      }
-
-      if (isNaN(radiusValue) || radiusValue <= 0) {
-        alert("Inserisci un numero valido di chilometri!");
+      if (!centerText || isNaN(radiusValue) || radiusValue <= 0) {
+        alert("Inserisci un luogo e un raggio valido!");
         return;
       }
 
       const coords = await fetchCoordinatesFromServer(centerText);
       if (coords) {
-        searchCenterCoords = { ...coords, name: centerText };
+        window.searchCenterCoords = { ...coords, name: centerText };
         filterEvents();
       } else {
-        alert("Impossibile trovare il luogo o CAP inserito per la ricerca raggio.");
+        alert("Impossibile trovare il luogo per la ricerca raggio.");
       }
-    }
+    };
 
-    function resetRadiusFilter() {
+    window.resetRadiusFilter = function() {
       document.getElementById('centerLocationInput').value = '';
-      searchCenterCoords = null;
+      window.searchCenterCoords = null;
       filterEvents();
-    }
+    };
 
     function updateMapMarkers(filteredEvents) {
+      if (!markersGroup) return;
       markersGroup.clearLayers();
       let bounds = [];
 
-      if (searchCenterCoords) {
-        const centerMarker = L.circleMarker([searchCenterCoords.lat, searchCenterCoords.lng], {
+      if (window.searchCenterCoords) {
+        const centerMarker = L.circleMarker([window.searchCenterCoords.lat, window.searchCenterCoords.lng], {
           radius: 11,
           fillColor: "#007bff",
           color: "#ffffff",
@@ -870,9 +866,9 @@
           opacity: 1,
           fillOpacity: 0.95
         });
-        centerMarker.bindPopup(`<b>📍 Centro ricerca: ${searchCenterCoords.name}</b>`);
+        centerMarker.bindPopup(`<b>📍 Centro ricerca: ${window.searchCenterCoords.name}</b>`);
         markersGroup.addLayer(centerMarker);
-        bounds.push([searchCenterCoords.lat, searchCenterCoords.lng]);
+        bounds.push([window.searchCenterCoords.lat, window.searchCenterCoords.lng]);
       }
 
       filteredEvents.forEach(ev => {
@@ -917,22 +913,18 @@
       try {
         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryText)}`);
         const data = await response.json();
-
         if (data && data.length > 0) {
-          return {
-            lat: parseFloat(data[0].lat),
-            lng: parseFloat(data[0].lon)
-          };
+          return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
         }
       } catch (err) {
-        console.error("Errore Geocoding Server:", err);
+        console.error("Errore Geocoding:", err);
       }
       return null;
     }
 
-    async function lookupAddressCoordinates() {
+    window.lookupAddressCoordinates = async function() {
       const loc = document.getElementById('evLocation').value.trim();
-      if (!loc) { alert("Scrivi prima una località o un CAP nel campo!"); return; }
+      if (!loc) { alert("Scrivi prima una località o un CAP!"); return; }
 
       const coords = await fetchCoordinatesFromServer(loc);
       if (coords) {
@@ -940,11 +932,11 @@
         document.getElementById('evLng').value = coords.lng;
         alert(`📍 Coordinate trovate: ${coords.lat}, ${coords.lng}`);
       } else {
-        alert("Impossibile trovare le coordinate per questo luogo.");
+        alert("Impossibile trovare le coordinate.");
       }
-    }
+    };
 
-    async function autoExtractData() {
+    window.autoExtractData = async function() {
       const link = document.getElementById('evLink').value.trim();
       if (!link) { alert("Incolla prima un link valido!"); return; }
 
@@ -985,108 +977,66 @@
       document.getElementById('evTags').value = extractedTags.join(', ');
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('evStartDate').value = today;
-      handleStartDateChange();
-      
+      window.handleStartDateChange();
       document.getElementById('evImg').value = "";
-
       alert("✨ Dati estratti!");
-    }
+    };
 
-    async function saveEvent() {
-      if (!isAdmin) return;
-
-      const editingId = document.getElementById('editingEventId').value;
+    window.searchImagesOnline = async function() {
       const title = document.getElementById('evTitle').value.trim();
-      const location = document.getElementById('evLocation').value.trim();
-      let lat = parseFloat(document.getElementById('evLat').value);
-      let lng = parseFloat(document.getElementById('evLng').value);
-      const startDate = document.getElementById('evStartDate').value;
-      let endDate = document.getElementById('evEndDate').value;
-      const tagsRaw = document.getElementById('evTags').value;
-      let image = document.getElementById('evImg').value.trim();
-      const link = document.getElementById('evLink').value.trim();
+      const tags = document.getElementById('evTags').value.trim();
+      const query = (title + " " + tags).trim() || "festival italia";
 
-      if (!title || !location || !startDate) {
-        alert("Compila i campi obbligatori: Nome, Luogo e Data Inizio!");
-        return;
-      }
+      const grid = document.getElementById('imageSearchResults');
+      grid.innerHTML = "<small style='grid-column: span 3;'>Ricerca in corso...</small>";
+      grid.style.display = "grid";
 
-      if (isNaN(lat) || isNaN(lng)) {
-        const coords = await fetchCoordinatesFromServer(location);
-        if (coords) {
-          lat = coords.lat;
-          lng = coords.lng;
+      try {
+        const response = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gteissearch=1&gsrsearch=${encodeURIComponent(query)}&gsrlimit=6&prop=pageimages&piprop=thumbnail&pithumbsize=600&format=json&origin=*`);
+        const data = await response.json();
+        grid.innerHTML = "";
+        
+        if (data.query && data.query.pages) {
+          const pages = Object.values(data.query.pages);
+          let found = false;
+          pages.forEach(page => {
+            if (page.thumbnail && page.thumbnail.source) {
+              found = true;
+              const img = document.createElement('img');
+              img.src = page.thumbnail.source;
+              img.title = "Clicca per selezionare";
+              img.onclick = () => {
+                document.getElementById('evImg').value = page.thumbnail.source;
+                grid.style.display = 'none';
+              };
+              grid.appendChild(img);
+            }
+          });
+          if (!found) grid.innerHTML = "<small style='grid-column: span 3;'>Nessuna immagine trovata.</small>";
         } else {
-          lat = 44.235;
-          lng = 8.102;
+          grid.innerHTML = "<small style='grid-column: span 3;'>Nessuna immagine trovata.</small>";
         }
+      } catch (err) {
+        grid.innerHTML = "<small style='grid-column: span 3;'>Errore durante la ricerca online.</small>";
       }
+    };
 
-      if (!endDate) endDate = startDate;
-      const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : ["evento"];
+    function getAutoImageUrl(title, location, tagsArray) {
+      const textToAnalyze = `${title} ${location} ${tagsArray.join(' ')}`.toLowerCase();
+      let queryKeyword = "festival";
 
-      if (!image) {
-        image = getAutoImageUrl(title, location, tags);
-      }
+      if (textToAnalyze.includes("primavera") || textToAnalyze.includes("fiori")) queryKeyword = "flowers,spring";
+      else if (textToAnalyze.includes("fung") || textToAnalyze.includes("porcin")) queryKeyword = "mushrooms";
+      else if (textToAnalyze.includes("castagn") || textToAnalyze.includes("caldarroste")) queryKeyword = "chestnuts";
+      else if (textToAnalyze.includes("vino") || textToAnalyze.includes("vendemmia")) queryKeyword = "wine";
+      else if (textToAnalyze.includes("birra")) queryKeyword = "beer";
+      else if (textToAnalyze.includes("musica") || textToAnalyze.includes("concerto")) queryKeyword = "concert";
+      else if (textToAnalyze.includes("sagra") || textToAnalyze.includes("cibo")) queryKeyword = "food";
 
-      if (editingId) {
-        events = events.map(ev => {
-          if (ev.id == editingId) {
-            return {
-              ...ev,
-              title,
-              location,
-              lat,
-              lng,
-              startDate,
-              endDate,
-              tags,
-              image,
-              link: link || ev.link
-            };
-          }
-          return ev;
-        });
-      } else {
-        const newEvent = {
-          id: Date.now(),
-          title,
-          location,
-          lat,
-          lng,
-          startDate,
-          endDate,
-          tags,
-          image,
-          link: link || '#'
-        };
-        events.push(newEvent);
-      }
-
-      localStorage.setItem('mmeventi_data', JSON.stringify(events));
-      toggleModal(false);
-      renderTags();
-      filterEvents();
+      return `https://picsum.photos/seed/${encodeURIComponent(queryKeyword)}/600/400`;
     }
 
-    function deleteCurrentEvent() {
-      if (!isAdmin) return;
-      const editingId = document.getElementById('editingEventId').value;
-      if (!editingId) return;
-
-      if (confirm("Sei sicuro di voler eliminare questo evento?")) {
-        events = events.filter(e => e.id != editingId);
-        localStorage.setItem('mmeventi_data', JSON.stringify(events));
-        toggleModal(false);
-        renderTags();
-        filterEvents();
-      }
-    }
-
-    /* ===================================================
-        MODAL & UTILITÀ
-    =================================================== */
-    function openAddModal() {
+    window.openAddModal = function() {
       document.getElementById('modalTitle').innerText = "➕ Inserisci Evento";
       document.getElementById('editingEventId').value = "";
       document.getElementById('evLink').value = "";
@@ -1102,10 +1052,10 @@
       document.getElementById('btnDelete').style.display = "none";
       document.getElementById('imageSearchResults').style.display = "none";
       toggleModal(true);
-    }
+    };
 
-    function openEditModal(eventId) {
-      const ev = events.find(e => e.id === eventId);
+    window.openEditModal = function(eventId) {
+      const ev = window.events.find(e => e.id === eventId);
       if (!ev) return;
 
       document.getElementById('modalTitle').innerText = "✏️ Modifica Evento";
@@ -1118,16 +1068,16 @@
       document.getElementById('evStartDate').value = ev.startDate;
       document.getElementById('evEndDate').value = ev.endDate || ev.startDate;
       document.getElementById('evEndDate').disabled = false;
-      document.getElementById('evTags').value = ev.tags.join(', ');
-      document.getElementById('evImg').value = ev.image;
+      document.getElementById('evTags').value = ev.tags ? ev.tags.join(', ') : '';
+      document.getElementById('evImg').value = ev.image || '';
       document.getElementById('btnDelete').style.display = "block";
       document.getElementById('imageSearchResults').style.display = "none";
       toggleModal(true);
-    }
+    };
 
-    function toggleModal(show) {
+    window.toggleModal = function(show) {
       document.getElementById('adminModal').style.display = show ? 'flex' : 'none';
-    }
+    };
 
     function formatDateDisplay(startDate, endDate) {
       if (!startDate) return '';
@@ -1141,38 +1091,37 @@
       const tagsContainer = document.getElementById('tagsList');
       const resetBtn = document.getElementById('btnResetTags');
       const allTags = new Set();
-      events.forEach(e => e.tags.forEach(t => allTags.add(t.toLowerCase())));
+      
+      window.events.forEach(e => {
+        if (e.tags) e.tags.forEach(t => allTags.add(t.toLowerCase()));
+      });
 
       tagsContainer.innerHTML = '';
       allTags.forEach(tag => {
         const span = document.createElement('span');
-        span.className = `tag ${selectedTags.has(tag) ? 'active' : ''}`;
+        span.className = `tag ${window.selectedTags.has(tag) ? 'active' : ''}`;
         span.innerText = `#${tag}`;
         span.onclick = () => toggleTag(tag);
         tagsContainer.appendChild(span);
       });
 
-      // Mostra o nasconde il tasto azzera tag se ci sono tag attivi
-      resetBtn.style.display = selectedTags.size > 0 ? 'inline-block' : 'none';
+      resetBtn.style.display = window.selectedTags.size > 0 ? 'inline-block' : 'none';
     }
 
     function toggleTag(tag) {
-      if (selectedTags.has(tag)) {
-        selectedTags.delete(tag);
-      } else {
-        selectedTags.add(tag);
-      }
+      if (window.selectedTags.has(tag)) window.selectedTags.delete(tag);
+      else window.selectedTags.add(tag);
       renderTags();
       filterEvents();
     }
 
-    function resetTagFilter() {
-      selectedTags.clear();
+    window.resetTagFilter = function() {
+      window.selectedTags.clear();
       renderTags();
       filterEvents();
-    }
+    };
 
-    function setQuickDate(type) {
+    window.setQuickDate = function(type) {
       const today = new Date();
       const startDateInput = document.getElementById('filterStartDate');
       const endDateInput = document.getElementById('filterEndDate');
@@ -1184,10 +1133,8 @@
       } else if (type === 'weekend') {
         const dayOfWeek = today.getDay();
         const distanceToSaturday = dayOfWeek === 0 ? -1 : 6 - dayOfWeek;
-        
         const saturday = new Date(today);
         saturday.setDate(today.getDate() + distanceToSaturday);
-        
         const sunday = new Date(saturday);
         sunday.setDate(saturday.getDate() + 1);
 
@@ -1195,29 +1142,26 @@
         endDateInput.value = sunday.toISOString().split('T')[0];
       }
       filterEvents();
-    }
+    };
 
-    function resetDateFilter() {
+    window.resetDateFilter = function() {
       document.getElementById('filterStartDate').value = '';
       document.getElementById('filterEndDate').value = '';
       filterEvents();
-    }
+    };
 
-    /* ===================================================
-        FILTRAGGIO E RENDERING EVENTI
-    =================================================== */
-    function filterEvents() {
+    window.filterEvents = function() {
       const search = document.getElementById('searchInput').value.toLowerCase().trim();
       const filterStart = document.getElementById('filterStartDate').value;
       const filterEnd = document.getElementById('filterEndDate').value;
       const radiusKm = parseFloat(document.getElementById('radiusKmInput').value);
 
-      let filtered = events.map(ev => {
+      let filtered = window.events.map(ev => {
         let calculatedDistance = undefined;
-        if (searchCenterCoords && ev.lat && ev.lng) {
+        if (window.searchCenterCoords && ev.lat && ev.lng) {
           calculatedDistance = calculateDistanceKm(
-            searchCenterCoords.lat, 
-            searchCenterCoords.lng, 
+            window.searchCenterCoords.lat, 
+            window.searchCenterCoords.lng, 
             ev.lat, 
             ev.lng
           );
@@ -1226,60 +1170,46 @@
       });
 
       filtered = filtered.filter(ev => {
-        // Ricerca Testuale
-        const matchesSearch = ev.title.toLowerCase().includes(search) || 
-                              ev.location.toLowerCase().includes(search) || 
-                              ev.tags.some(t => t.toLowerCase().includes(search));
+        const matchesSearch = (ev.title && ev.title.toLowerCase().includes(search)) || 
+                              (ev.location && ev.location.toLowerCase().includes(search)) || 
+                              (ev.tags && ev.tags.some(t => t.toLowerCase().includes(search)));
 
-        // Ricerca Tag
-        const matchesTags = selectedTags.size === 0 || 
-                            Array.from(selectedTags).every(t => ev.tags.map(tag => tag.toLowerCase()).includes(t));
+        const matchesTags = window.selectedTags.size === 0 || 
+                            (ev.tags && Array.from(window.selectedTags).every(t => ev.tags.map(tag => tag.toLowerCase()).includes(t)));
 
-        // Ricerca Date
         let matchesDate = true;
         if (filterStart || filterEnd) {
           const evStart = ev.startDate;
           const evEnd = ev.endDate || ev.startDate;
-
-          if (filterStart && filterEnd) {
-            matchesDate = evStart <= filterEnd && evEnd >= filterStart;
-          } else if (filterStart) {
-            matchesDate = evEnd >= filterStart;
-          } else if (filterEnd) {
-            matchesDate = evStart <= filterEnd;
-          }
+          if (filterStart && filterEnd) matchesDate = evStart <= filterEnd && evEnd >= filterStart;
+          else if (filterStart) matchesDate = evEnd >= filterStart;
+          else if (filterEnd) matchesDate = evStart <= filterEnd;
         }
 
-        // Ricerca Raggio Geografia
         let matchesRadius = true;
-        if (searchCenterCoords) {
-          if (ev.calculatedDistance !== undefined) {
-            matchesRadius = ev.calculatedDistance <= radiusKm;
-          } else {
-            matchesRadius = false;
-          }
+        if (window.searchCenterCoords) {
+          matchesRadius = ev.calculatedDistance !== undefined && ev.calculatedDistance <= radiusKm;
         }
 
         return matchesSearch && matchesTags && matchesDate && matchesRadius;
       });
 
-      if (searchCenterCoords) {
+      if (window.searchCenterCoords) {
         filtered.sort((a, b) => (a.calculatedDistance || 0) - (b.calculatedDistance || 0));
       } else {
-        // Ordinamento predefinito per data di inizio crescente
-        filtered.sort((a, b) => a.startDate.localeCompare(b.startDate));
+        filtered.sort((a, b) => (a.startDate || '').localeCompare(b.startDate || ''));
       }
 
       renderEvents(filtered);
       updateMapMarkers(filtered);
-    }
+    };
 
     function renderEvents(eventsToRender) {
       const container = document.getElementById('eventsList');
       container.innerHTML = '';
 
       if (eventsToRender.length === 0) {
-        container.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">Nessun evento trovato con i filtri selezionati.</p>';
+        container.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">Nessun evento trovato.</p>';
         return;
       }
 
@@ -1287,16 +1217,13 @@
         const card = document.createElement('div');
         card.className = 'event-card';
 
-        const tagsHtml = ev.tags.map(t => `<span class="event-tag-small">#${t}</span>`).join(' ');
-        
+        const tagsHtml = ev.tags ? ev.tags.map(t => `<span class="event-tag-small">#${t}</span>`).join(' ') : '';
         const distanceBadgeHtml = ev.calculatedDistance !== undefined 
           ? `<span class="distance-badge">📍 ${ev.calculatedDistance.toFixed(1)} km</span>` 
           : '';
-
-        const editBtnHtml = isAdmin 
-          ? `<button class="btn-edit" onclick="openEditModal(${ev.id})">✏️ Modifica</button>` 
+        const editBtnHtml = window.isAdmin 
+          ? `<button class="btn-edit" onclick="openEditModal('${ev.id}')">✏️ Modifica</button>` 
           : '';
-
         const externalLinkHtml = ev.link && ev.link !== '#' 
           ? `<a href="${ev.link}" target="_blank" class="event-link">🔗 Info / Link</a>` 
           : '';
@@ -1315,7 +1242,7 @@
             <div class="event-actions">
               <div class="event-links-group">
                 ${externalLinkHtml}
-                <button class="btn-share" onclick="shareEvent(${ev.id})">📲 Condividi</button>
+                <button class="btn-share" onclick="shareEvent('${ev.id}')">📲 Condividi</button>
               </div>
               ${editBtnHtml}
             </div>
